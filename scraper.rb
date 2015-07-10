@@ -30,9 +30,19 @@ def scrape_list(url)
   end
 end
 
+# Erk
+# expect("Foo (Bar)", "Foo", "Bar")
+# expect("Foo (Bar )", "Foo", "Bar")
+# expect("Foo ( Bar )", "Foo", "Bar")
+# expect(" Foo ( Bar )", "Foo", "Bar")
+# expect(" Foo ( Bar ) ", "Foo", "Bar")
+# expect("Foo(Bar)", "Foo", "Bar")
+# expect("Foo (Bar) (F(B))", "Foo (Bar)", "F(B)")
 def unbracket(text)
-  if m = text.match(/(.*?)\s*\(\s*(.*?)\s*\)/)
-    return m.captures
+  if m = text.match(/(.*)\((.*?\(.*?\))\)/)
+    return m.captures.map(&:strip)
+  elsif m = text.match(/(.*)\s*\(\s*(.*?)\s*\)/)
+    return m.captures.map(&:strip)
   else
     return [m, nil]
   end
