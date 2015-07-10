@@ -60,7 +60,7 @@ def scrape_person(url)
 
   data = { 
     id: url.to_s[/mpsno=(\d+)/, 1],
-    name: box1.css('.gridheader1').text.strip,
+    name: box1.css('.gridheader1').first.text.strip,
     party: party,
     party_id: party_id,
     area_state: state,
