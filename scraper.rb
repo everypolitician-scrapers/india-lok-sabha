@@ -77,13 +77,5 @@ def scrape_person(url)
   ScraperWiki.save_sqlite([:name, :term], data)
 end
 
-term = {
-  id: '16',
-  name: 'XVI Lok Sabha',
-  start_date: '2014-05-26',
-  source: 'https://en.wikipedia.org/wiki/16th_Lok_Sabha',
-}
-ScraperWiki.save_sqlite([:id], term, 'terms')
-
 @URL = 'http://164.100.47.132/LssNew/Members/breif_alphalist.aspx'
 scrape_list('cached.html')
