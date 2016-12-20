@@ -70,7 +70,7 @@ def scrape_person(url)
     image: noko.css('#ctl00_ContPlaceHolderMain_Alphabaticallist1_Image1/@src').text,
     source: url.to_s,
   }
-  puts data
+  # puts data
   ScraperWiki.save_sqlite([:name, :term], data)
 end
 
