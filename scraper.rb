@@ -7,7 +7,6 @@ require 'open-uri'
 require 'cgi'
 require 'json'
 require 'date'
-require 'colorize'
 
 require 'pry'
 require 'open-uri/cached'
