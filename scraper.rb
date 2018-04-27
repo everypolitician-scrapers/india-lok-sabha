@@ -63,7 +63,7 @@ def scrape_person(url)
     homepage: internets.map(&:split).flatten.find { |t| t[/http/] || t[/www/] },
     birth_date: date_from(noko.xpath('.//table//td[contains(.,"Date of Birth")]/following-sibling::td').text.strip),
     term: '16',
-    image: noko.css('#ctl00_ContPlaceHolderMain_Alphabaticallist1_Image1/@src').text,
+    image: noko.css('#ContentPlaceHolder1_Image1/@src').text,
     source: url.to_s,
   }
   puts data.reject { |_, v| v.to_s.empty? }.sort_by { |k, _| k }.to_h if ENV['MORPH_DEBUG']
