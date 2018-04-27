@@ -70,6 +70,7 @@ def scrape_person(url)
   ScraperWiki.save_sqlite([:name, :term], data)
 end
 
+ScraperWiki.sqliteexecute('DROP TABLE data') rescue nil
 base = 'http://164.100.47.194/Loksabha/Members/AlphabeticalList.aspx'
 member_urls(base).each do |url|
   scrape_person(url)
