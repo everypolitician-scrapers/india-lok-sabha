@@ -20,10 +20,10 @@ def date_from(str)
   Date.parse(str).to_s
 end
 
-def scrape_list(url)
+def member_urls(url)
   noko = noko_for(url)
-  noko.css('table#ctl00_ContPlaceHolderMain_Alphabaticallist1_dg1 td.griditem a[href*="briefbio"]/@href').map(&:text).each do |link|
-    scrape_person(URI.join(@URL, link))
+  noko.css('.member_list_table a/@href').map(&:text).uniq.select { |href| href.include? 'MemberBioprofile.aspx' }.map do |link|
+    URI.join(url, link)
   end
 end
 
@@ -48,31 +48,29 @@ end
 def scrape_person(url)
   noko = noko_for(url)
 
-  box1 = noko.css('#ctl00_ContPlaceHolderMain_Alphabaticallist1_Datagrid1')
-  box2 = noko.css('#ctl00_ContPlaceHolderMain_Alphabaticallist1_DataGrid2')
+  area, state  = unbracket noko.xpath('.//table//td[contains(.,"Constituency")]/following-sibling::td').text.gsub(/[[:space:]]+/, ' ').strip
+  party, party_id = unbracket noko.xpath('.//table//td[contains(.,"Party")]/following-sibling::td').text.gsub(/[[:space:]]+/, ' ').strip
+  internets = noko.xpath('.//table//td[contains(.,"Email")]/following-sibling::td/text()').map(&:text).map(&:strip).map { |t| t.gsub('[AT]','@').gsub('[DOT]','.') }
 
-  area, state  = unbracket box1.xpath('.//table//td[contains(.,"Constituency")]/following-sibling::td').text.gsub(/[[:space:]]+/, ' ').strip
-  party, party_id = unbracket box1.xpath('.//table//td[contains(.,"Party")]/following-sibling::td').text.gsub(/[[:space:]]+/, ' ').strip
-  internets = box1.xpath('.//table//td[contains(.,"Email")]/following-sibling::td/text()').map(&:text).map(&:strip)
-
-  data = { 
+  data = {
     id: url.to_s[/mpsno=(\d+)/, 1],
-    name: box1.css('.gridheader1').first.text.strip,
+    name: noko.css('.gridheader1').first.text.strip,
     party: party,
     party_id: party_id,
     area_state: state,
     constituency: area,
     email: internets.map(&:split).flatten.find { |t| t[/@/] },
     homepage: internets.map(&:split).flatten.find { |t| t[/http/] || t[/www/] },
-    prior: noko.css('#ctl00_ContPlaceHolderMain_Alphabaticallist1_Label9').text[/Member\s+(.*?)\s+Lok Sabha/, 1],
-    birth_date: date_from(box2.xpath('.//table//td[contains(.,"Date of Birth")]/following-sibling::td').text.strip),
+    birth_date: date_from(noko.xpath('.//table//td[contains(.,"Date of Birth")]/following-sibling::td').text.strip),
     term: '16',
     image: noko.css('#ctl00_ContPlaceHolderMain_Alphabaticallist1_Image1/@src').text,
     source: url.to_s,
   }
-  # puts data
+  puts data.reject { |_, v| v.to_s.empty? }.sort_by { |k, _| k }.to_h if ENV['MORPH_DEBUG']
   ScraperWiki.save_sqlite([:name, :term], data)
 end
 
-@URL = 'http://164.100.47.132/LssNew/Members/breif_alphalist.aspx'
-scrape_list('cached.html')
+base = 'http://164.100.47.194/Loksabha/Members/AlphabeticalList.aspx'
+member_urls(base).each do |url|
+  scrape_person(url)
+end
